@@ -2,6 +2,6 @@ package Minesweeper.model;
 
 public interface Cell {
 
-    CellContent getContent();
-
+    public CellCoverState getCoverState();
+    public void setCoverState(CellCoverState coverState);
 }

@@ -1,14 +1,5 @@
 package Minesweeper.model;
 
-public class UncoveredCell implements Cell {
+public class UncoveredCell implements CellCoverState {
 
-    private CellContent content;
-
-    public UncoveredCell(CellContent content) {
-        this.content = content;
-    }
-
-    public CellContent getContent() {
-        return content;
-    }
 }

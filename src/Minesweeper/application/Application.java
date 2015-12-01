@@ -31,9 +31,9 @@ public class Application extends JFrame {
     }
 
     private void createCommands(){
-        /*gameDisplay = new SwingGameDisplay(this);
+        gameDisplay = new SwingGameDisplay(this);
         boardDialog = new SwingBoardDialog(this);
-        commands.put("Create Board", new CreateBoardCommand(this.boardDialog));*/
+        commands.put("Create Board", new CreateBoardCommand(this.boardDialog));
         //commands.put("Run Game", new RunGameCommand(this.gameDisplay,¿?));
     }
 
@@ -42,9 +42,7 @@ public class Application extends JFrame {
         this.setSize(400, 400);
         this.setDefaultCloseOperation(this.EXIT_ON_CLOSE);
         this.getContentPane().setLayout(new BorderLayout());
-        //execute("Create Board");
-        //boardOptions();
-        new CreateBoardCommand(new SwingBoardDialog(this)).execute();
+        execute("Create Board");
         this.pack();
         this.setVisible(true);
     }

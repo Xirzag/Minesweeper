@@ -55,37 +55,37 @@ public class MinefieldFiller {
     }
 
     private static void addCellWithoutMine(Minefield field, Position position) {
-        CellWithoutMine cell = new CellWithoutMine();
-        field.addCell(new CoveredCell(cell));
+        Cell cell = new CellWithoutMine(new CoveredCell());
+        field.addCell(cell);
         configureCell(cell, position, field);
     }
 
     private static void addCellWithMine(Minefield field, Position position) {
-        CellWithMine mine = new CellWithMine();
-        field.addCell(new CoveredCell(mine));
+        Cell mine = new CellWithMine(new CoveredCell());
+        field.addCell(mine);
         configureCell(mine, position, field);
     }
 
 
-    private static void configureCell(CellContent cell, Position position, Minefield field) {
+    private static void configureCell(Cell cell, Position position, Minefield field) {
         if(position.y() > 0){
 
-            linkCells(cell, field.getCell(new Position(position.x(), position.y() - 1)).getContent());
+            linkCells(cell, field.getCell(new Position(position.x(), position.y() - 1)));
 
             if(position.x() != 0){
-                linkCells(cell, field.getCell(new Position(position.x()-1, position.y()-1)).getContent());
+                linkCells(cell, field.getCell(new Position(position.x()-1, position.y()-1)));
             }
             if(position.x() < (field.getBoard().dimension().cols -1)){
-                linkCells(cell, field.getCell(new Position(position.x()+1, position.y()-1)).getContent());
+                linkCells(cell, field.getCell(new Position(position.x()+1, position.y()-1)));
             }
         }
         if(position.x() > 0){
-            linkCells(cell, field.getCell(new Position(position.x()-1, position.y())).getContent());
+            linkCells(cell, field.getCell(new Position(position.x()-1, position.y())));
         }
 
     }
 
-    private static void linkCells(CellContent cell, CellContent otherCell){
+    private static void linkCells(Cell cell, Cell otherCell){
         if(cell instanceof CellWithoutMine)
             ((CellWithoutMine)cell).addAdjacentCells(otherCell);
 

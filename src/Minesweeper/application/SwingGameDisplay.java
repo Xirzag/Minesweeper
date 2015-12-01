@@ -83,14 +83,14 @@ public class SwingGameDisplay extends JPanel implements GameDisplay {
     }
 
     private void refreshCell(JButton uiCell, Cell cell) {
-        if(cell instanceof CoveredCell) {
+        if(cell.getCoverState() instanceof CoveredCell) {
             uiCell.setBackground(Color.darkGray);
-            CoveredCell coveredCell = (CoveredCell) cell;
-            if(((CoveredCell) cell).getFlag() == Flag.MineFlag){
+            CoveredCell coveredCell = (CoveredCell) cell.getCoverState();
+            if(coveredCell.getFlag() == Flag.MineFlag){
                 uiCell.setText("P");
                 uiCell.setForeground(Color.RED);
-            }else if(((CoveredCell) cell).getFlag() == Flag.QuestionMarkFlag) {
-                if(game.isFinished() && cell.getContent() instanceof CellWithMine) {
+            }else if(coveredCell.getFlag() == Flag.QuestionMarkFlag) {
+                if(game.isFinished() && cell instanceof CellWithMine) {
                     uiCell.setForeground(Color.RED);
                     uiCell.setText("*");
                 }
@@ -99,7 +99,7 @@ public class SwingGameDisplay extends JPanel implements GameDisplay {
                     uiCell.setForeground(Color.BLUE);
                 }
             }else{
-                if(game.isFinished() && cell.getContent() instanceof CellWithMine) {
+                if(game.isFinished() && cell instanceof CellWithMine) {
                     uiCell.setForeground(Color.RED);
                     uiCell.setText("*");
                 }
@@ -107,11 +107,10 @@ public class SwingGameDisplay extends JPanel implements GameDisplay {
             }
         }else{
             uiCell.setBackground(Color.lightGray);
-            CellContent content = cell.getContent();
-            if(content instanceof CellWithMine) {
+            if(cell instanceof CellWithMine) {
                 uiCell.setText("*");
             }else{
-                int nearMines = ((CellWithoutMine) content).nearMines();
+                int nearMines = ((CellWithoutMine) cell).nearMines();
                 if(nearMines!=0){
                     uiCell.setText(Integer.toString(nearMines));
                     uiCell.setForeground(numberColor[nearMines-1]);

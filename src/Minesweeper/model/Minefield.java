@@ -1,7 +1,6 @@
 package Minesweeper.model;
 
 import java.util.ArrayList;
-import java.util.List;
 
 public class Minefield {
     private Board board;
@@ -27,12 +26,14 @@ public class Minefield {
 
     public void setFlag(Position cellPosition, Flag flag) {
         Cell cell = getCell(cellPosition);
-        if( cell instanceof CoveredCell) ((CoveredCell) cell).setFlag(flag);
+        if( cell.getCoverState() instanceof CoveredCell)
+            ((CoveredCell) cell.getCoverState()).setFlag(flag);
     }
 
     public Flag getFlag(Position cellPosition) {
         Cell cell = getCell(cellPosition);
-        if( cell instanceof CoveredCell) return ((CoveredCell) cell).getFlag();
+        if( cell.getCoverState() instanceof CoveredCell)
+            return ((CoveredCell) cell.getCoverState()).getFlag();
         return Flag.None;
     }
 
