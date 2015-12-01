@@ -5,15 +5,16 @@ import Minesweeper.ui.GameDisplay;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.Dimension;
 import java.awt.event.*;
 
-public class SwingGameDisplay implements GameDisplay {
+public class SwingGameDisplay extends JPanel implements GameDisplay {
 
     private final JFrame frame;
     private Container previousPane;
-    private JPanel gameContainer;
     private Game game;
     private JButton[][] board;
+    private int cellSize = 50;
 
     public SwingGameDisplay(JFrame frame) {
         this.frame = frame;
@@ -28,9 +29,11 @@ public class SwingGameDisplay implements GameDisplay {
     public void createBoard(){
         savePreviousData();
 
-        gameContainer = new JPanel(new GridLayout(
+        this.setLayout(new GridLayout(
                 game.getBoard().dimension().rows, game.getBoard().dimension().cols));
-        frame.setContentPane(gameContainer);
+        frame.setContentPane(this);
+        frame.setSize(new Dimension(this.game.getBoard().dimension().cols*cellSize,
+                this.game.getBoard().dimension().rows*cellSize));
         board = new JButton[game.getBoard().dimension().cols][game.getBoard().dimension().rows];
 
         for(int j = 0; j < game.getBoard().dimension().rows; j++){
@@ -57,11 +60,11 @@ public class SwingGameDisplay implements GameDisplay {
                     }
 
                 });
-                gameContainer.add(board[i][j]);
+                this.add(board[i][j]);
             }
         }
 
-        frame.setContentPane(gameContainer);
+        frame.setContentPane(this);
         frame.validate();
         frame.repaint();
     }
