@@ -2,6 +2,11 @@ package Minesweeper.model;
 
 public interface Cell {
 
-    public CellCoverState getCoverState();
-    public void setCoverState(CellCoverState coverState);
+    void open() throws MineExplosion, WinGame;
+    boolean isOpen();
+    boolean isMine();
+    int nearMines();
+    void setFlag(Flag flag);
+    Flag getFlag();
+
 }

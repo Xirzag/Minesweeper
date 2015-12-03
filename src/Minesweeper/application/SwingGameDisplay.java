@@ -1,122 +1,98 @@
 package Minesweeper.application;
 
 import Minesweeper.model.*;
+import Minesweeper.ui.CellDisplay;
 import Minesweeper.ui.GameDisplay;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.Dimension;
 import java.awt.event.*;
+import java.util.ArrayList;
 
 public class SwingGameDisplay extends JPanel implements GameDisplay {
 
     private final JFrame frame;
     private Container previousPane;
-    private Game game;
-    private JButton[][] board;
+    private Board board;
+    private ArrayList<CellPanel> boardCells = new ArrayList<>();
     private int cellSize = 50;
 
-    public SwingGameDisplay(JFrame frame) {
+    public SwingGameDisplay(JFrame frame, Board board) {
         this.frame = frame;
+        this.board = board;
+    }
+
+    private enum GameResult{
+        win, lose;
     }
 
     @Override
-    public void show(Game game) {
-        this.game = game;
+    public void display() {
         createBoard();
     }
 
-    public void createBoard(){
+    private Position indexToPosition(int index){
+        return new Position(index/board.dim().rows, index % board.dim().rows);
+    }
+
+    private void createBoard() {
         savePreviousData();
 
-        this.setLayout(new GridLayout(
-                game.getBoard().dimension().rows, game.getBoard().dimension().cols));
+        this.setLayout(new GridLayout(board.dim().rows, board.dim().cols));
         frame.setContentPane(this);
-        frame.setSize(new Dimension(this.game.getBoard().dimension().cols*cellSize,
-                this.game.getBoard().dimension().rows*cellSize));
-        board = new JButton[game.getBoard().dimension().cols][game.getBoard().dimension().rows];
+        frame.setSize(new Dimension(this.board.dim().cols*cellSize, this.board.dim().rows*cellSize));
 
-        for(int j = 0; j < game.getBoard().dimension().rows; j++){
-            for(int i = 0; i < game.getBoard().dimension().cols; i++){
-                board[i][j] = new JButton();
-                board[i][j].setBackground(Color.darkGray);
-                Position cellPosition = new Position(i, j);
-                board[i][j].addMouseListener(new MouseAdapter() {
-                    @Override
-                    public void mouseClicked(MouseEvent e) {
-                        if (e.getButton() == MouseEvent.BUTTON1) {
-                            game.updateGame(cellPosition);
-                            refreshDisplay();
-                        }else if(e.getButton() == MouseEvent.BUTTON3){
-                            Flag cellFlag = game.getMineField().getFlag(cellPosition);
-                            if(cellFlag == Flag.None)
-                                game.getMineField().setFlag(cellPosition, Flag.MineFlag);
-                            else if(cellFlag == Flag.MineFlag)
-                                game.getMineField().setFlag(cellPosition, Flag.QuestionMarkFlag);
-                            else if(cellFlag == Flag.QuestionMarkFlag)
-                                game.getMineField().setFlag(cellPosition, Flag.None);
-                            refreshDisplay();
-                        }
-                    }
-
-                });
-                this.add(board[i][j]);
-            }
-        }
+        for (int i = 0; i < this.board.dim().getArea(); i++)
+            addCellIndex(i);
 
         frame.setContentPane(this);
         frame.validate();
         frame.repaint();
     }
 
-    final static Color[] numberColor = {Color.blue,Color.green, Color.red,
-            Color.MAGENTA, Color.CYAN, Color.ORANGE,Color.PINK, Color.YELLOW };
-
-    public void refreshDisplay(){
-        for(int i = 0; i < game.getBoard().dimension().cols; i++) {
-            for (int j = 0; j < game.getBoard().dimension().rows; j++) {
-                Cell cell = game.getMineField().getCell(new Position(i, j));
-                refreshCell(board[i][j], cell);
-
-            }
-        }
+    private void addCellIndex(int i) {
+        Cell cell = board.getCell(indexToPosition(i));
+        CellPanel cellPanel = new CellPanel(cell);
+        boardCells.add(i, cellPanel);
+        this.add(cellPanel);
+        cellPanel.display();
+        cellPanel.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                if (e.getButton() == MouseEvent.BUTTON1) {
+                    try{
+                        cell.open();
+                    }catch (WinGame winGame){
+                        finishGame(GameResult.win);
+                    }catch (MineExplosion explosion){
+                        finishGame(GameResult.lose);
+                    }
+                    refreshDisplay();
+                } else if (e.getButton() == MouseEvent.BUTTON3) {
+                    Flag cellFlag = cell.getFlag();
+                    if (cellFlag == Flag.None)
+                        cell.setFlag(Flag.MineFlag);
+                    else if (cellFlag == Flag.MineFlag)
+                        cell.setFlag(Flag.QuestionMarkFlag);
+                    else if (cellFlag == Flag.QuestionMarkFlag)
+                        cell.setFlag(Flag.None);
+                    refreshDisplay();
+                }
+            };
+        });
     }
 
-    private void refreshCell(JButton uiCell, Cell cell) {
-        if(cell.getCoverState() instanceof CoveredCell) {
-            uiCell.setBackground(Color.darkGray);
-            CoveredCell coveredCell = (CoveredCell) cell.getCoverState();
-            if(coveredCell.getFlag() == Flag.MineFlag){
-                uiCell.setText("P");
-                uiCell.setForeground(Color.RED);
-            }else if(coveredCell.getFlag() == Flag.QuestionMarkFlag) {
-                if(game.isFinished() && cell instanceof CellWithMine) {
-                    uiCell.setForeground(Color.RED);
-                    uiCell.setText("*");
-                }
-                else{
-                    uiCell.setText("?");
-                    uiCell.setForeground(Color.BLUE);
-                }
-            }else{
-                if(game.isFinished() && cell instanceof CellWithMine) {
-                    uiCell.setForeground(Color.RED);
-                    uiCell.setText("*");
-                }
-                else uiCell.setText("");
-            }
-        }else{
-            uiCell.setBackground(Color.lightGray);
-            if(cell instanceof CellWithMine) {
-                uiCell.setText("*");
-            }else{
-                int nearMines = ((CellWithoutMine) cell).nearMines();
-                if(nearMines!=0){
-                    uiCell.setText(Integer.toString(nearMines));
-                    uiCell.setForeground(numberColor[nearMines-1]);
-                }
-            }
-        }
+    private void finishGame(GameResult result) {
+        if(result == GameResult.win)System.out.println("Has ganado");
+        else System.out.println("Has perdido");
+        for (CellPanel cellPanel : boardCells)
+            cellPanel.showMines();
+    }
+
+    public void refreshDisplay()  {
+        for (CellDisplay cellPanel : boardCells)
+            cellPanel.display();
     }
 
     private void savePreviousData(){

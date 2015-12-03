@@ -1,7 +1,8 @@
 package Minesweeper.ui;
 
-import Minesweeper.model.Game;
+import Minesweeper.model.Board;
 
 public interface GameDisplay {
-    void show(Game game);
+
+    void display();
 }

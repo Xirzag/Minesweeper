@@ -17,7 +17,7 @@ public class SwingBoardDialog extends JPanel implements BoardDialog{
     }
 
     @Override
-    public void show() {
+    public void display() {
         boardOptions();
     }
 
@@ -43,7 +43,7 @@ public class SwingBoardDialog extends JPanel implements BoardDialog{
                     new Minesweeper.model.Dimension((Integer) rowsInput.getValue(), (Integer) colsInput.getValue()),
                     (Integer) minesInput.getValue());
 
-            new RunGameCommand(new SwingGameDisplay(frame), board).execute();
+            new RunGameCommand(new SwingGameDisplay(frame, board)).execute();
         });
 
         this.add(button);

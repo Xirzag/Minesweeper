@@ -1,7 +1,5 @@
 package Minesweeper.control;
 
-import Minesweeper.model.Board;
-import Minesweeper.model.Game;
 import Minesweeper.ui.BoardDialog;
 
 public class CreateBoardCommand implements Command {
@@ -12,6 +10,6 @@ public class CreateBoardCommand implements Command {
     }
 
     public void execute(){
-        dialog.show();
+        dialog.display();
     }
 }

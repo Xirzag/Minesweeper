@@ -1,5 +1,5 @@
 package Minesweeper.ui;
 
 public interface BoardDialog {
-    void show();
+    void display();
 }

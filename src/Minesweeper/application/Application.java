@@ -31,7 +31,7 @@ public class Application extends JFrame {
     }
 
     private void createCommands(){
-        gameDisplay = new SwingGameDisplay(this);
+        //gameDisplay = new SwingGameDisplay(this);
         boardDialog = new SwingBoardDialog(this);
         commands.put("Create Board", new CreateBoardCommand(this.boardDialog));
         //commands.put("Run Game", new RunGameCommand(this.gameDisplay,¿?));
