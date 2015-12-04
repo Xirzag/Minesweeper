@@ -14,6 +14,11 @@ public class Position {
         return (obj instanceof Position)? this.x == ((Position) obj).x && this.y == ((Position) obj).y: false;
     }
 
+    @Override
+    public int hashCode(){
+        return x * y;
+    }
+
     public int x() {
         return x;
     }

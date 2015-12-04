@@ -13,13 +13,14 @@ public class Board {
     public Board(Dimension dimension, int mineAmount) {
         this.dimension = dimension;
         this.mineAmount = mineAmount;
+        fillCoverCells();
     }
 
     public Cell getCell(Position position) {
-        if(mines.size() == 0) initBoard();
         return new Cell() {
             @Override
             public void open() throws MineExplosion, WinGame {
+                if(mines.size() == 0) fillMines(position);
                 if(mines.contains(position)) throw new MineExplosion();
                 else if(closedCells.containsKey(position)) openCell();
                 if(mines.size() == closedCells.size()) throw new WinGame();
@@ -78,16 +79,11 @@ public class Board {
         };
     }
 
-    private void initBoard() {
-        fillMines();
-        fillCoverCells();
-    }
 
     private void fillCoverCells() {
         for(int i = 0; i < dimension.cols; i++)
-            for (int j = 0; j < dimension.rows; j++) {
+            for (int j = 0; j < dimension.rows; j++)
                 closedCells.put(new Position(i,j),Flag.None);
-            }
     }
 
     public Dimension dim() {
@@ -98,12 +94,12 @@ public class Board {
         return mineAmount;
     }
 
-    private void fillMines() {
+    private void fillMines(Position initPos) {
         for (int i = 0; i < mineAmount; i++) {
             Position position;
             do{
                 position = getRandomPosition();
-            }while(mines.contains(position));
+            }while(mines.contains(position) || position.equals(initPos));
             mines.add(position);
         }
     }

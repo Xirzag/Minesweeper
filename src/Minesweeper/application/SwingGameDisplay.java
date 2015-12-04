@@ -36,6 +36,10 @@ public class SwingGameDisplay extends JPanel implements GameDisplay {
         return new Position(index/board.dim().rows, index % board.dim().rows);
     }
 
+    private int positionToIndex(Position position){
+        return position.y() * board.dim().cols + position.x();
+    }
+
     private void createBoard() {
         savePreviousData();
 
@@ -43,19 +47,20 @@ public class SwingGameDisplay extends JPanel implements GameDisplay {
         frame.setContentPane(this);
         frame.setSize(new Dimension(this.board.dim().cols*cellSize, this.board.dim().rows*cellSize));
 
-        for (int i = 0; i < this.board.dim().getArea(); i++)
-            addCellIndex(i);
+        for (int j = 0; j < this.board.dim().rows; j++)
+            for (int i = 0; i < this.board.dim().cols; i++)
+                addCellIndex(new Position(i,j));
 
         frame.setContentPane(this);
         frame.validate();
         frame.repaint();
     }
 
-    private void addCellIndex(int i) {
-        Cell cell = board.getCell(indexToPosition(i));
+    private void addCellIndex(Position position) {
+        Cell cell = board.getCell(position);
         CellPanel cellPanel = new CellPanel(cell);
-        boardCells.add(i, cellPanel);
-        this.add(cellPanel);
+        boardCells.add(positionToIndex(position), cellPanel);
+        this.add(cellPanel,positionToIndex(position));
         cellPanel.display();
         cellPanel.addMouseListener(new MouseAdapter() {
             @Override
