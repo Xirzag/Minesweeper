@@ -5,11 +5,10 @@ import Minesweeper.control.CreateBoardCommand;
 import Minesweeper.control.RunGameCommand;
 import Minesweeper.model.Board;
 import Minesweeper.model.Dimension;
+import Minesweeper.view.GameMediator;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -42,9 +41,12 @@ public class Application extends JFrame {
         this.setSize(400, 400);
         this.setDefaultCloseOperation(this.EXIT_ON_CLOSE);
         this.getContentPane().setLayout(new BorderLayout());
-        execute("Create Board");
+        //execute("Create Board");
         this.pack();
         this.setVisible(true);
+
+        GameMediator mediator = new GameConcreteMediator();
+        new RunGameCommand(new SwingGameDisplay(this, new Board(new Dimension(8,8),10, mediator), mediator)).execute();
     }
 
     void execute(String command){
