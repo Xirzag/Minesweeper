@@ -1,18 +1,25 @@
 package Minesweeper.model;
 
+import Minesweeper.view.GameMediator;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Random;
+import java.util.Timer;
 
 public class Board {
     private final int mineAmount;
+    private GameMediator mediator;
     private final Dimension dimension;
     private final ArrayList<Position> mines = new ArrayList<>();
     private final HashMap<Position,Flag> closedCells = new HashMap<>();
+    Timer timer;
 
-    public Board(Dimension dimension, int mineAmount) {
+    public Board(Dimension dimension, int mineAmount, GameMediator mediator) {
         this.dimension = dimension;
         this.mineAmount = mineAmount;
+        this.mediator = mediator;
+        mediator.registerBoard(this);
         fillCoverCells();
     }
 
@@ -20,7 +27,7 @@ public class Board {
         return new Cell() {
             @Override
             public void open() throws MineExplosion, WinGame {
-                if(mines.size() == 0) fillMines(position);
+                if(mines.size() == 0) startGame(position);
                 if(mines.contains(position)) throw new MineExplosion();
                 else if(closedCells.containsKey(position)) openCell();
                 if(mines.size() == closedCells.size()) throw new WinGame();
@@ -70,6 +77,7 @@ public class Board {
             @Override
             public void setFlag(Flag flag) {
                 closedCells.replace(position, flag);
+                notifyFlagsChanged();
             }
 
             @Override
@@ -77,6 +85,12 @@ public class Board {
                 return closedCells.get(position);
             }
         };
+    }
+
+    private void notifyFlagsChanged() {
+        int count = (int) closedCells.values().stream().filter(f-> f == Flag.MineFlag).count();
+
+        mediator.setRemainingMines(mineAmount - count);
     }
 
 
@@ -94,6 +108,10 @@ public class Board {
         return mineAmount;
     }
 
+    void startGame(Position initPos){
+        fillMines(initPos);
+    }
+
     private void fillMines(Position initPos) {
         for (int i = 0; i < mineAmount; i++) {
             Position position;
@@ -104,7 +122,7 @@ public class Board {
         }
     }
 
-    public Position getRandomPosition() {
+    private Position getRandomPosition() {
         Random random = new Random();
         return new Position(random.nextInt(dimension.cols-1),random.nextInt(dimension.rows-1));
     }

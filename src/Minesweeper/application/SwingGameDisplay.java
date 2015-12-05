@@ -3,8 +3,10 @@ package Minesweeper.application;
 import Minesweeper.model.*;
 import Minesweeper.ui.CellDisplay;
 import Minesweeper.ui.GameDisplay;
+import Minesweeper.view.GameMediator;
 
 import javax.swing.*;
+import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.awt.Dimension;
 import java.awt.event.*;
@@ -15,12 +17,17 @@ public class SwingGameDisplay extends JPanel implements GameDisplay {
     private final JFrame frame;
     private Container previousPane;
     private Board board;
+    private GameMediator mediator;
+    private JLabel timer;
+    private JLabel remainingMines;
     private ArrayList<CellPanel> boardCells = new ArrayList<>();
     private int cellSize = 50;
 
-    public SwingGameDisplay(JFrame frame, Board board) {
+    public SwingGameDisplay(JFrame frame, Board board, GameMediator mediator) {
         this.frame = frame;
         this.board = board;
+        this.mediator = mediator;
+        mediator.registerDisplay(this);
     }
 
     private enum GameResult{
@@ -29,7 +36,7 @@ public class SwingGameDisplay extends JPanel implements GameDisplay {
 
     @Override
     public void display() {
-        createBoard();
+        createPanels();
     }
 
     private Position indexToPosition(int index){
@@ -40,27 +47,42 @@ public class SwingGameDisplay extends JPanel implements GameDisplay {
         return position.y() * board.dim().cols + position.x();
     }
 
-    private void createBoard() {
+
+    private void createPanels(){
         savePreviousData();
-
-        this.setLayout(new GridLayout(board.dim().rows, board.dim().cols));
+        this.setLayout(new BorderLayout());
+        this.add(createBoard(), BorderLayout.CENTER);
+        this.add(createStatsPanel(), BorderLayout.NORTH);
         frame.setContentPane(this);
-        frame.setSize(new Dimension(this.board.dim().cols*cellSize, this.board.dim().rows*cellSize));
-
-        for (int j = 0; j < this.board.dim().rows; j++)
-            for (int i = 0; i < this.board.dim().cols; i++)
-                addCellIndex(new Position(i,j));
-
+        frame.setSize(new Dimension(this.board.dim().cols*cellSize, this.board.dim().rows*cellSize+cellSize));
         frame.setContentPane(this);
         frame.validate();
         frame.repaint();
     }
 
-    private void addCellIndex(Position position) {
+    private JPanel createStatsPanel() {
+        JPanel statsBar = new JPanel(new BorderLayout());
+        remainingMines = new JLabel(Integer.toString(board.getMineAmount()));
+        timer = new JLabel("0");
+        statsBar.add(remainingMines, BorderLayout.WEST);
+        statsBar.add(timer, BorderLayout.EAST);
+        statsBar.setBorder(new EmptyBorder(10,20,10,20));
+        return statsBar;
+    }
+
+    private JPanel createBoard() {
+        JPanel boardPanel = new JPanel(new GridLayout(board.dim().rows, board.dim().cols));
+        for (int j = 0; j < this.board.dim().rows; j++)
+            for (int i = 0; i < this.board.dim().cols; i++)
+                addCellIndex(new Position(i,j), boardPanel);
+        return boardPanel;
+    }
+
+    private void addCellIndex(Position position, JPanel boardPanel) {
         Cell cell = board.getCell(position);
         CellPanel cellPanel = new CellPanel(cell);
         boardCells.add(positionToIndex(position), cellPanel);
-        this.add(cellPanel,positionToIndex(position));
+        boardPanel.add(cellPanel, positionToIndex(position));
         cellPanel.display();
         cellPanel.addMouseListener(new MouseAdapter() {
             @Override
@@ -95,9 +117,17 @@ public class SwingGameDisplay extends JPanel implements GameDisplay {
             cellPanel.showMines();
     }
 
-    public void refreshDisplay()  {
+    protected void refreshDisplay()  {
         for (CellDisplay cellPanel : boardCells)
             cellPanel.display();
+    }
+
+    public void setRemainingMines(int mines) {
+        remainingMines.setText(Integer.toString(mines));
+    }
+
+    public void setTimer(String time){
+        timer.setText(time);
     }
 
     private void savePreviousData(){

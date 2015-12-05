@@ -3,6 +3,7 @@ package Minesweeper.application;
 import Minesweeper.control.RunGameCommand;
 import Minesweeper.model.*;
 import Minesweeper.ui.BoardDialog;
+import Minesweeper.view.GameMediator;
 
 import javax.swing.*;
 import java.awt.*;
@@ -22,9 +23,6 @@ public class SwingBoardDialog extends JPanel implements BoardDialog{
     }
 
     private void boardOptions(){
-
-        savePreviousData();
-
         this.setLayout(new GridLayout(4,2));
 
         this.add(new JLabel("Filas"));
@@ -39,11 +37,12 @@ public class SwingBoardDialog extends JPanel implements BoardDialog{
         JButton button = new JButton("Jugar");
 
         button.addActionListener(e -> {
+            GameMediator mediator = new GameConcreteMediator();
             Board board = new Board(
                     new Minesweeper.model.Dimension((Integer) rowsInput.getValue(), (Integer) colsInput.getValue()),
-                    (Integer) minesInput.getValue());
+                    (Integer) minesInput.getValue(), mediator);
 
-            new RunGameCommand(new SwingGameDisplay(frame, board)).execute();
+            new RunGameCommand(new SwingGameDisplay(frame, board, mediator)).execute();
         });
 
         this.add(button);
@@ -51,11 +50,4 @@ public class SwingBoardDialog extends JPanel implements BoardDialog{
         frame.setContentPane(this);
     }
 
-    private void savePreviousData(){
-        previousPane = frame.getContentPane();
-    }
-
-    private void restorePreviousData(){
-        frame.setContentPane(previousPane);
-    }
 }
