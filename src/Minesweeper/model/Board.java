@@ -5,32 +5,39 @@ import Minesweeper.view.GameMediator;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Random;
-import java.util.Timer;
 
 public class Board {
-    private final int mineAmount;
+    private final int numberOfMines;
     private GameMediator mediator;
     private final Dimension dimension;
-    private final ArrayList<Position> mines = new ArrayList<>();
+    private final ArrayList<Position> minesPositions = new ArrayList<>();
     private final HashMap<Position,Flag> closedCells = new HashMap<>();
-    Timer timer;
+    private GameTimer gameTimer;
 
-    public Board(Dimension dimension, int mineAmount, GameMediator mediator) {
+    public Board(Dimension dimension, int numberOfMines) {
         this.dimension = dimension;
-        this.mineAmount = mineAmount;
+        this.numberOfMines = numberOfMines;
+    }
+
+    public void setMediator(GameMediator mediator) {
         this.mediator = mediator;
+        this.gameTimer = new GameTimer(mediator);
         mediator.registerBoard(this);
-        fillCoverCells();
     }
 
     public Cell getCell(Position position) {
         return new Cell() {
             @Override
             public void open() throws MineExplosion, WinGame {
-                if(mines.size() == 0) startGame(position);
-                if(mines.contains(position)) throw new MineExplosion();
+                if(minesPositions.size() == 0) startGame(position);
+                if(minesPositions.contains(position)) explodeMine();
                 else if(closedCells.containsKey(position)) openCell();
-                if(mines.size() == closedCells.size()) throw new WinGame();
+                if(minesPositions.size() == closedCells.size()) throw new WinGame();
+            }
+
+            private void explodeMine() throws MineExplosion {
+                closedCells.remove(position);
+                throw new MineExplosion();
             }
 
             private void openCell() throws MineExplosion, WinGame {
@@ -48,7 +55,7 @@ public class Board {
 
             @Override
             public boolean isMine() {
-                return mines.contains(position);
+                return minesPositions.contains(position);
             }
 
             @Override
@@ -64,14 +71,13 @@ public class Board {
                 ArrayList<Cell> adjCells = new ArrayList<>();
                 for(int i = -1; i <= 1; i++)
                     for(int j = -1; j <= 1; j++)
-                        addCell(i,j, adjCells);
+                        addCell(new Position(position.x() + i, position.y() + j), adjCells);
                 return adjCells;
             }
 
-            private void addCell(int i, int j, ArrayList<Cell> adjCells) {
-                Position adjPosition = new Position(position.x() + i, position.y() + j);
-                if(!position.equals(adjPosition))
-                    adjCells.add(getCell(adjPosition));
+            private void addCell(Position adjacentPos, ArrayList<Cell> adjacentCells) {
+                if(!position.equals(adjacentPos) && position.isInside(dimension))
+                    adjacentCells.add(getCell(adjacentPos));
             }
 
             @Override
@@ -87,16 +93,23 @@ public class Board {
         };
     }
 
+    public void prepareForGame(){
+        fillCoverCells();
+    }
+
+    public int getNumberOfMines() {
+        return numberOfMines;
+    }
+
     private void notifyFlagsChanged() {
         int count = (int) closedCells.values().stream().filter(f-> f == Flag.MineFlag).count();
 
-        mediator.setRemainingMines(mineAmount - count);
+        mediator.setRemainingMines(numberOfMines - count);
     }
 
-
     private void fillCoverCells() {
-        for(int i = 0; i < dimension.cols; i++)
-            for (int j = 0; j < dimension.rows; j++)
+        for(int i = 0; i < dimension.cols(); i++)
+            for (int j = 0; j < dimension.rows(); j++)
                 closedCells.put(new Position(i,j),Flag.None);
     }
 
@@ -104,26 +117,23 @@ public class Board {
         return dimension;
     }
 
-    public int getMineAmount() {
-        return mineAmount;
-    }
-
-    void startGame(Position initPos){
+    private void startGame(Position initPos){
         fillMines(initPos);
+        gameTimer.start();
     }
 
     private void fillMines(Position initPos) {
-        for (int i = 0; i < mineAmount; i++) {
+        for (int i = 0; i < numberOfMines; i++) {
             Position position;
-            do{
+            do
                 position = getRandomPosition();
-            }while(mines.contains(position) || position.equals(initPos));
-            mines.add(position);
+            while(minesPositions.contains(position) || position.equals(initPos));
+            minesPositions.add(position);
         }
     }
 
     private Position getRandomPosition() {
         Random random = new Random();
-        return new Position(random.nextInt(dimension.cols-1),random.nextInt(dimension.rows-1));
+        return new Position(random.nextInt(dimension.cols()-1),random.nextInt(dimension.rows()-1));
     }
 }
