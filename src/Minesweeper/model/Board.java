@@ -94,6 +94,7 @@ public class Board {
     }
 
     public void prepareForGame(){
+        minesPositions.clear();
         fillCoverCells();
     }
 

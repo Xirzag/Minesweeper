@@ -17,11 +17,11 @@ public class RunGameCommand implements Command {
 
     public void execute(){
         GameMediator mediator = new GameConcreteMediator();
-        display.setMediator(mediator);
+
         board.setMediator(mediator);
         board.prepareForGame();
 
-        display.setBoard(board);
+        display.initGame(board, mediator);
         display.display();
     }
 
