@@ -1,17 +1,19 @@
 package Minesweeper.view;
 
 import Minesweeper.model.Board;
-import Minesweeper.ui.GameDisplay;
+import Minesweeper.model.GameTimer;
+import Minesweeper.view.ui.GameDisplay;
 
-import java.util.Timer;
+import java.time.Duration;
 
 public interface GameMediator {
 
     void registerDisplay(GameDisplay display);
     void registerBoard(Board board);
-    void registerTimer(Timer timer);
+    void registerTimer(GameTimer timer);
 
-    void setTime(String time);
+    void setTime(Duration time);
     void setRemainingMines(int mines);
+    void stopTimer();
 
 }

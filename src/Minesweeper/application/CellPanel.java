@@ -2,7 +2,7 @@ package Minesweeper.application;
 
 import Minesweeper.model.Cell;
 import Minesweeper.model.Flag;
-import Minesweeper.ui.CellDisplay;
+import Minesweeper.view.ui.CellDisplay;
 
 import javax.swing.*;
 import java.awt.*;
@@ -13,6 +13,9 @@ public class CellPanel extends JButton implements CellDisplay {
     private boolean gameFinish = false;
 
     public CellPanel(Cell cell) {
+        int fontSize = this.getFontMetrics(this.getFont()).getHeight();
+        this.setPreferredSize(new Dimension(fontSize+20, fontSize+20));
+        this.setMargin(new Insets(2,2,2,2));
         this.cell = cell;
     }
 
@@ -25,7 +28,6 @@ public class CellPanel extends JButton implements CellDisplay {
 
     @Override
     public void display() {
-        boolean a = cell.isOpen();
         if (cell.isOpen()) {
             this.setBackground(Color.lightGray);
             openCellDisplay();

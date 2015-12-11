@@ -1,4 +1,4 @@
-package Minesweeper.persistence;
+package Minesweeper.view.persistence;
 
 import Minesweeper.model.Board;
 import Minesweeper.model.Ranking;

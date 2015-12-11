@@ -34,4 +34,8 @@ public class Position {
     public void setY(int y) {
         this.y = y;
     }
+
+    public boolean isInside(Dimension dimension){
+        return x >= 0 && x < dimension.cols() && y >= 0 && y < dimension.rows();
+    }
 }

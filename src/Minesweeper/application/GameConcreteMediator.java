@@ -1,16 +1,17 @@
 package Minesweeper.application;
 
 import Minesweeper.model.Board;
-import Minesweeper.ui.GameDisplay;
+import Minesweeper.model.GameTimer;
+import Minesweeper.view.ui.GameDisplay;
 import Minesweeper.view.GameMediator;
 
-import java.util.Timer;
+import java.time.Duration;
 
 public class GameConcreteMediator implements GameMediator
 {
 
     GameDisplay display;
-    Timer timer;
+    GameTimer timer;
     Board board;
 
 
@@ -25,17 +26,22 @@ public class GameConcreteMediator implements GameMediator
     }
 
     @Override
-    public void registerTimer(Timer timer) {
+    public void registerTimer(GameTimer timer) {
         this.timer = timer;
     }
 
     @Override
-    public void setTime(String time) {
+    public void setTime(Duration time) {
         display.setTimer(time);
     }
 
     @Override
     public void setRemainingMines(int mines) {
         display.setRemainingMines(mines);
+    }
+
+    @Override
+    public void stopTimer() {
+        timer.stop();
     }
 }

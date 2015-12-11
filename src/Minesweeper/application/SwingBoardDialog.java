@@ -1,53 +1,61 @@
 package Minesweeper.application;
 
 import Minesweeper.control.RunGameCommand;
-import Minesweeper.model.*;
-import Minesweeper.ui.BoardDialog;
-import Minesweeper.view.GameMediator;
+import Minesweeper.model.Board;
+import Minesweeper.view.ui.BoardDialog;
 
 import javax.swing.*;
+import javax.swing.border.EmptyBorder;
 import java.awt.*;
 
-public class SwingBoardDialog extends JPanel implements BoardDialog{
+public class SwingBoardDialog extends JFrame implements BoardDialog{
 
-    JFrame frame;
-    private Container previousPane;
+    private final SwingGameDisplay gameDisplay;
+    private final Application frameFather;
 
-    public SwingBoardDialog(JFrame frame) {
-        this.frame = frame;
+    public SwingBoardDialog(SwingGameDisplay gameDisplay, Application application) {
+        this.gameDisplay = gameDisplay;
+        this.frameFather = application;
     }
 
     @Override
     public void display() {
         boardOptions();
+        this.setDefaultCloseOperation(this.DISPOSE_ON_CLOSE);
+        this.add(boardOptions());
+        this.pack();
+        this.setVisible(true);
     }
 
-    private void boardOptions(){
-        this.setLayout(new GridLayout(4,2));
+    private JPanel boardOptions(){
+        JPanel panel = new JPanel(new GridLayout(4, 2));
+        panel.setBorder(new EmptyBorder(10,10,10,10));
 
-        this.add(new JLabel("Filas"));
+        panel.add(new JLabel("Rows"));
         JSpinner rowsInput = new JSpinner(new SpinnerNumberModel(8, 1, 400, 1));
-        this.add(rowsInput);
-        this.add(new JLabel("Columnas"));
+        panel.add(rowsInput);
+        panel.add(new JLabel("Cols"));
         JSpinner colsInput = new JSpinner(new SpinnerNumberModel(8, 1, 400, 1));
-        this.add(colsInput);
-        this.add(new JLabel("Minas"));
+        panel.add(colsInput);
+        panel.add(new JLabel("Mines"));
         JSpinner minesInput = new JSpinner(new SpinnerNumberModel(10, 1, 16000, 1));
-        this.add(minesInput);
-        JButton button = new JButton("Jugar");
+        panel.add(minesInput);
+        JButton button = new JButton("Play");
 
         button.addActionListener(e -> {
-            GameMediator mediator = new GameConcreteMediator();
+
             Board board = new Board(
                     new Minesweeper.model.Dimension((Integer) rowsInput.getValue(), (Integer) colsInput.getValue()),
-                    (Integer) minesInput.getValue(), mediator);
+                    (Integer) minesInput.getValue());
 
-            new RunGameCommand(new SwingGameDisplay(frame, board, mediator)).execute();
+            new RunGameCommand(gameDisplay, board).execute();
+            frameFather.pack();
+            this.dispose();
         });
 
-        this.add(button);
+        panel.add(button);
 
-        frame.setContentPane(this);
+        return panel;
     }
 
 }
