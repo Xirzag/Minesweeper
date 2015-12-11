@@ -27,13 +27,15 @@ public class SwingGameDisplay extends JPanel implements GameDisplay {
     public SwingGameDisplay() {
     }
 
-    public void setBoard(Board board) {
+    public void initGame(Board board, GameMediator mediator) {
+        if(isNotTheFirstGame()) this.mediator.stopTimer();
         this.board = board;
-    };
-
-    public void setMediator(GameMediator mediator) {
         this.mediator = mediator;
         mediator.registerDisplay(this);
+    };
+
+    private boolean isNotTheFirstGame() {
+        return mediator != null;
     }
 
     private enum GameResult{
@@ -59,8 +61,6 @@ public class SwingGameDisplay extends JPanel implements GameDisplay {
         this.setLayout(new BorderLayout());
         this.add(createBoard(), BorderLayout.CENTER);
         this.add(createStatsPanel(), BorderLayout.NORTH);
-        //this.setSize(new Dimension(this.board.dim().cols() * cellSize, this.board.dim().rows() * cellSize + cellSize));
-        //this.setPreferredSize(new Dimension(this.board.dim().cols() * cellSize, this.board.dim().rows() * cellSize + cellSize));
         this.validate();
         this.repaint();
     }
