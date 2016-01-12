@@ -20,4 +20,9 @@ public class Dimension {
     public int cols(){
         return cols;
     }
+
+    @Override
+    public boolean equals(Object obj) {
+        return (obj instanceof Dimension)? this.cols == ((Dimension) obj).cols && this.rows == ((Dimension) obj).rows: false;
+    }
 }

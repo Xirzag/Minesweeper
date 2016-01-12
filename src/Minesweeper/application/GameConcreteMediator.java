@@ -3,7 +3,8 @@ package Minesweeper.application;
 import Minesweeper.model.Board;
 import Minesweeper.model.GameTimer;
 import Minesweeper.view.ui.GameDisplay;
-import Minesweeper.view.GameMediator;
+import Minesweeper.view.messaging.GameMediator;
+import Minesweeper.view.ui.RankingBoardsDisplay;
 
 import java.time.Duration;
 
@@ -13,6 +14,7 @@ public class GameConcreteMediator implements GameMediator
     GameDisplay display;
     GameTimer timer;
     Board board;
+    private RankingBoardsDisplay rankingBoardsDisplay;
 
 
     @Override
@@ -31,6 +33,11 @@ public class GameConcreteMediator implements GameMediator
     }
 
     @Override
+    public void registerRankingBoardDisplay(RankingBoardsDisplay rankingBoardsDisplay) {
+        this.rankingBoardsDisplay = rankingBoardsDisplay;
+    }
+
+    @Override
     public void setTime(Duration time) {
         display.setTimer(time);
     }
@@ -38,6 +45,11 @@ public class GameConcreteMediator implements GameMediator
     @Override
     public void setRemainingMines(int mines) {
         display.setRemainingMines(mines);
+    }
+
+    @Override
+    public void updateRankings() {
+        rankingBoardsDisplay.refreshBoardsDisplay();
     }
 
     @Override
