@@ -1,6 +1,6 @@
 package Minesweeper.model;
 
-import Minesweeper.view.GameMediator;
+import Minesweeper.view.messaging.GameMediator;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -14,15 +14,30 @@ public class Board {
     private final HashMap<Position,Flag> closedCells = new HashMap<>();
     private GameTimer gameTimer;
 
-    public Board(Dimension dimension, int numberOfMines) {
+    public Board(Dimension dimension, int numberOfMines) throws BoardError {
         this.dimension = dimension;
         this.numberOfMines = numberOfMines;
+        if(numberOfMines > dimension.getArea()-1)
+            throw new BoardError("Demasiadas minas");
+        if(dimension.cols() < 3 || dimension.rows() < 3)
+            throw new BoardError("Dimensiones demasiado pequeñas");
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if(!(obj instanceof Board)) return false;
+        Board board = (Board) obj;
+        boolean haveTheSameMines = board.getNumberOfMines() == this.getNumberOfMines();
+        boolean haveTheSameDimension  = this.dim().equals(board.dim());
+
+        return  haveTheSameMines && haveTheSameDimension;
     }
 
     public void setMediator(GameMediator mediator) {
         this.mediator = mediator;
-        this.gameTimer = new GameTimer(mediator);
         mediator.registerBoard(this);
+        this.gameTimer = new GameTimer();
+        this.gameTimer.setMediator(mediator);
     }
 
     public Cell getCell(Position position) {
@@ -98,6 +113,10 @@ public class Board {
         fillCoverCells();
     }
 
+    public GameTimer getGameTimer() {
+        return gameTimer;
+    }
+
     public int getNumberOfMines() {
         return numberOfMines;
     }
@@ -135,6 +154,8 @@ public class Board {
 
     private Position getRandomPosition() {
         Random random = new Random();
-        return new Position(random.nextInt(dimension.cols()-1),random.nextInt(dimension.rows()-1));
+        int posCols = (dimension.cols()>1)? random.nextInt(dimension.cols()-1) : 1;
+        int posRows = (dimension.rows()>1)? random.nextInt(dimension.rows()-1) : 1;
+        return new Position(posCols,posRows);
     }
 }
