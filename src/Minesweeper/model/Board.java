@@ -12,7 +12,7 @@ public class Board {
     private final Dimension dimension;
     private final ArrayList<Position> minesPositions = new ArrayList<>();
     private final HashMap<Position,Flag> closedCells = new HashMap<>();
-    private GameTimer gameTimer;
+    private boolean gameFinish = false;
 
     public Board(Dimension dimension, int numberOfMines) throws BoardError {
         this.dimension = dimension;
@@ -33,64 +33,75 @@ public class Board {
         return  haveTheSameMines && haveTheSameDimension;
     }
 
+    @Override
+    public String toString() {
+        return dimension.toString() + " " + numberOfMines;
+    }
+
     public void setMediator(GameMediator mediator) {
         this.mediator = mediator;
         mediator.registerBoard(this);
-        this.gameTimer = new GameTimer();
-        this.gameTimer.setMediator(mediator);
     }
 
     public Cell getCell(Position position) {
         return new Cell() {
             @Override
-            public void open() throws MineExplosion, WinGame {
-                if(minesPositions.size() == 0) startGame(position);
-                if(minesPositions.contains(position)) explodeMine();
-                else if(closedCells.containsKey(position)) openCell();
-                if(minesPositions.size() == closedCells.size()) throw new WinGame();
+            public void open() {
+                startGameIfNotWithInitialSelectedCell(position);
+                openCellIfIsNotOpenedYet();
+                checkIfThePlayerWinTheGame();
+                mediator.openCell(this);
             }
 
-            private void explodeMine() throws MineExplosion {
-                closedCells.remove(position);
-                throw new MineExplosion();
+            private void openCellIfIsNotOpenedYet() {
+                if(isAMineInPosition(position)) explodeMine();
+                else if(isCellClosedInPosition(position)) openCell();
             }
 
-            private void openCell() throws MineExplosion, WinGame {
+            private void explodeMine() {
                 closedCells.remove(position);
-                if(nearMines() == 0) {
-                    for(Cell adjacentCell : adjacentCells())
+                mediator.loseGame();
+            }
+
+            private void openCell() {
+                closedCells.remove(position);
+                if(nearMines() == 0)
+                    openAdjacentCells();
+
+            }
+
+            private void openAdjacentCells() {
+                for(Cell adjacentCell : adjacentCells())
+                    if(adjacentCell.getPosition().isInside(dimension))
                         adjacentCell.open();
-                }
             }
 
             @Override
             public boolean isOpen() {
-                return !closedCells.containsKey(position);
+                return !isCellClosedInPosition(position);
             }
 
             @Override
             public boolean isMine() {
-                return minesPositions.contains(position);
+                return isAMineInPosition(position);
             }
 
             @Override
             public int nearMines() {
-                int mineCount = 0;
-                for( Cell cell: adjacentCells())
-                    if(cell.isMine()) mineCount++;
+                return (int) adjacentCells().stream().
+                        filter(cell -> cell.isMine()).count();
 
-                return mineCount;
             }
 
             private ArrayList<Cell> adjacentCells(){
                 ArrayList<Cell> adjCells = new ArrayList<>();
                 for(int i = -1; i <= 1; i++)
                     for(int j = -1; j <= 1; j++)
-                        addCell(new Position(position.x() + i, position.y() + j), adjCells);
+                        addCellInPositionTo(new Position(position.x() + i, position.y() + j), adjCells);
                 return adjCells;
             }
 
-            private void addCell(Position adjacentPos, ArrayList<Cell> adjacentCells) {
+            private void addCellInPositionTo(Position adjacentPos, ArrayList<Cell> adjacentCells) {
                 if(!position.equals(adjacentPos) && position.isInside(dimension))
                     adjacentCells.add(getCell(adjacentPos));
             }
@@ -105,16 +116,38 @@ public class Board {
             public Flag getFlag() {
                 return closedCells.get(position);
             }
+
+            @Override
+            public Position getPosition() {
+                return position;
+            }
         };
+    }
+
+    private void checkIfThePlayerWinTheGame() {
+        if(allCellsWithoutMineAreOpened() && !gameFinish) {
+            mediator.winGame();
+            gameFinish = true;
+        }
+    }
+
+    private boolean allCellsWithoutMineAreOpened() {
+        return minesPositions.size() == closedCells.size();
+    }
+
+    private void startGameIfNotWithInitialSelectedCell(Position initPosition) {
+        if(this.minesPositions.size() == 0)
+            startGame(initPosition);
+
+    }
+
+    private boolean isCellClosedInPosition(Position position) {
+        return closedCells.containsKey(position);
     }
 
     public void prepareForGame(){
         minesPositions.clear();
         fillCoverCells();
-    }
-
-    public GameTimer getGameTimer() {
-        return gameTimer;
     }
 
     public int getNumberOfMines() {
@@ -139,17 +172,31 @@ public class Board {
 
     private void startGame(Position initPos){
         fillMines(initPos);
-        gameTimer.start();
+        mediator.startGame();
+        gameFinish = false;
     }
 
     private void fillMines(Position initPos) {
         for (int i = 0; i < numberOfMines; i++) {
-            Position position;
-            do
-                position = getRandomPosition();
-            while(minesPositions.contains(position) || position.equals(initPos));
-            minesPositions.add(position);
+            addMineExceptIn(initPos);
         }
+    }
+
+    private void addMineExceptIn(Position initPos) {
+        Position position = getRandomNotUsedPosition(initPos);
+        minesPositions.add(position);
+    }
+
+    private Position getRandomNotUsedPosition(Position initPos) {
+        Position position;
+        do
+            position = getRandomPosition();
+        while(isAMineInPosition(position) || position.equals(initPos));
+        return position;
+    }
+
+    private boolean isAMineInPosition(Position position) {
+        return minesPositions.contains(position);
     }
 
     private Position getRandomPosition() {

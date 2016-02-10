@@ -1,9 +1,7 @@
 package Minesweeper.model;
 
 import java.time.Duration;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 public class Ranking {
     public static class Result{
@@ -36,7 +34,18 @@ public class Ranking {
     }
 
     public List<Result> getRanking() {
+        Collections.sort(ranking, compareDuration());
         return ranking;
+    }
+
+    private Comparator compareDuration() {
+        return new Comparator<Result>(){
+
+            @Override
+            public int compare(Result result1, Result result2) {
+                return result1.getSolveTime().compareTo(result2.getSolveTime());
+            }
+        };
     }
 
     public Board getBoard() {

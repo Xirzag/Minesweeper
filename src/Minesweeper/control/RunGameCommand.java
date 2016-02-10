@@ -1,30 +1,40 @@
 package Minesweeper.control;
 
-import Minesweeper.application.GameConcreteMediator;
 import Minesweeper.model.Board;
+import Minesweeper.model.GameTimer;
 import Minesweeper.view.messaging.GameMediator;
 import Minesweeper.view.ui.GameDisplay;
-import Minesweeper.view.ui.RankingBoardsDisplay;
 
 public class RunGameCommand implements Command {
 
     private final GameDisplay display;
     private final Board board;
-    private final RankingBoardsDisplay rankingBoardsDisplay;
+    private final GameMediator mediator;
 
-    public RunGameCommand(GameDisplay display, Board board, RankingBoardsDisplay rankingBoardsDisplay) {
+    public RunGameCommand(GameDisplay display, Board board, GameMediator mediator) {
         this.display = display;
         this.board = board;
-        this.rankingBoardsDisplay = rankingBoardsDisplay;
+        this.mediator = mediator;
     }
 
     public void execute(){
-        GameMediator mediator= new GameConcreteMediator();
-        mediator.registerRankingBoardDisplay(rankingBoardsDisplay);
+        configureTimer();
+        configureBoard();
+        configureDisplay();
+    }
+
+    private void configureTimer() {
+        GameTimer timer = new GameTimer();
+        timer.setMediator(mediator);
+    }
+
+    private void configureBoard() {
         board.setMediator(mediator);
         board.prepareForGame();
+    }
 
-        display.initGame(board, mediator);
+    private void configureDisplay() {
+        display.initGame(board);
         display.display();
     }
 
