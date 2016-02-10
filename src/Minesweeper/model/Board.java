@@ -49,13 +49,15 @@ public class Board {
             public void open() {
                 startGameIfNotWithInitialSelectedCell(position);
                 openCellIfIsNotOpenedYet();
-                checkIfThePlayerWinTheGame();
                 mediator.openCell(this);
             }
 
             private void openCellIfIsNotOpenedYet() {
                 if(isAMineInPosition(position)) explodeMine();
-                else if(isCellClosedInPosition(position)) openCell();
+                else if(isCellClosedInPosition(position)) {
+                    openCell();
+                    checkIfThePlayerWinTheGame();
+                }
             }
 
             private void explodeMine() {
