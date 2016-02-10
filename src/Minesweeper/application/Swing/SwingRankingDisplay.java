@@ -10,6 +10,7 @@ import Minesweeper.view.ui.RankingDisplay;
 
 import javax.swing.*;
 import java.io.File;
+import java.util.ArrayList;
 
 public class SwingRankingDisplay extends JFrame implements RankingDisplay {
 
@@ -35,17 +36,30 @@ public class SwingRankingDisplay extends JFrame implements RankingDisplay {
             RankingReader reader = new RankingFileReader(new File("rankings.data"));
             createTabsWithTheBoardsIn(reader);
         } catch (RankingLoaderException e) {
-            showErrorMessage("No se ha podido abrir los rankings");
+            showErrorMessage("Can't read rankings");
             this.dispose();
         }
         return tabbedPane;
     }
 
     private void createTabsWithTheBoardsIn(RankingReader reader) throws RankingLoaderException {
-        for(Board board : reader.getBoards()) {
+        ArrayList<Board> boards = reader.getBoards();
+        if(boards.isEmpty())
+            showNoBoardMessageAndExit();
+        else
+            createTabs(reader, boards);
+    }
+
+    private void createTabs(RankingReader reader, ArrayList<Board> boards) {
+        for(Board board : boards) {
             JPanel resultDisplay = new SwingResultsDisplay(reader, board);
             tabbedPane.addTab(board.toString(), null, resultDisplay);
         }
+    }
+
+    private void showNoBoardMessageAndExit() {
+        showErrorMessage("There aren't any rankings");
+        this.dispose();
     }
 
     @Override

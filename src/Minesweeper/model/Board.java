@@ -201,8 +201,8 @@ public class Board {
 
     private Position getRandomPosition() {
         Random random = new Random();
-        int posCols = (dimension.cols()>1)? random.nextInt(dimension.cols()-1) : 1;
-        int posRows = (dimension.rows()>1)? random.nextInt(dimension.rows()-1) : 1;
+        int posCols = random.nextInt(dimension.cols());
+        int posRows = random.nextInt(dimension.rows());
         return new Position(posCols,posRows);
     }
 }

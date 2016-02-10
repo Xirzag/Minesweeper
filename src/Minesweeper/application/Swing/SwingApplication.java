@@ -15,6 +15,7 @@ import Minesweeper.view.ui.BoardListDisplay;
 import Minesweeper.view.ui.RankingDisplay;
 
 import javax.swing.*;
+import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.io.File;
 import java.util.ArrayList;
@@ -125,10 +126,8 @@ public class SwingApplication extends JFrame implements BoardListDisplay {
     }
 
     private JMenuItem itemRankingDisplay() {
-        JMenuItem menuItem = new JMenuItem("Rankings...", KeyEvent.VK_X);
         RankingDisplay rankingDisplay = new SwingRankingDisplay(this.mediator);
-        menuItem.addActionListener(e -> rankingDisplay.display() );
-        return menuItem;
+        return createMenuItem("Rankings...", KeyEvent.VK_R, e -> rankingDisplay.display());
     }
 
     private JMenu userBoardMenu() {
@@ -144,34 +143,30 @@ public class SwingApplication extends JFrame implements BoardListDisplay {
         System.exit(1);
     }
 
-    private JMenuItem itemExit() {
-        JMenuItem menuItem = new JMenuItem("Exit", KeyEvent.VK_X);
-        menuItem.addActionListener(e -> dispose() );
+    private JMenuItem createMenuItem(String name, int key, ActionListener command){
+        JMenuItem menuItem = new JMenuItem(name, key);
+        menuItem.addActionListener(command);
         return menuItem;
+    };
+
+    private JMenuItem itemExit() {
+        return createMenuItem("Exit", KeyEvent.VK_X, e -> dispose());
     }
 
     private JMenuItem itemEasyMode() {
-        JMenuItem menuItem = new JMenuItem("Easy mode", KeyEvent.VK_E);
-        menuItem.addActionListener(e -> execute("RunEasyGame"));
-        return menuItem;
+        return createMenuItem("Easy mode", KeyEvent.VK_E, e -> execute("RunEasyGame"));
     }
 
     private JMenuItem itemIntermediateMode() {
-        JMenuItem menuItem = new JMenuItem("Intermediate mode", KeyEvent.VK_I);
-        menuItem.addActionListener(e -> execute("RunIntermediateGame"));
-        return menuItem;
+        return createMenuItem("Intermediate mode", KeyEvent.VK_I, e -> execute("RunIntermediateGame"));
     }
 
     private JMenuItem itemExpertMode() {
-        JMenuItem menuItem = new JMenuItem("Expert mode", KeyEvent.VK_P);
-        menuItem.addActionListener(e -> execute("RunExpertGame"));
-        return menuItem;
+        return createMenuItem("Expert mode", KeyEvent.VK_P, e -> execute("RunExpertGame"));
     }
 
     private JMenuItem itemCustomBoard() {
-        JMenuItem menuItem = new JMenuItem("Custom Board...", KeyEvent.VK_C);
-        menuItem.addActionListener(e -> execute("CreateBoard"));
-        return menuItem;
+        return createMenuItem("Custom Board...", KeyEvent.VK_I, e -> execute("CreateBoard"));
     }
 
     private void execute(String command){
@@ -190,10 +185,19 @@ public class SwingApplication extends JFrame implements BoardListDisplay {
         try {
             RankingFileReader rankingFileReader = new RankingFileReader(new File("rankings.data"));
             ArrayList<Board> boards = rankingFileReader.getBoards();
-            addBoardsToUserBoardsMenu(boards);
+            if(boards.isEmpty())
+                addNoUserBoardsItem();
+            else
+                addBoardsToUserBoardsMenu(boards);
         } catch (RankingLoaderException e) {
-            exitWithFailure("Error loading los rankings");
+            exitWithFailure("Error reading rankings");
         }
+    }
+
+    private void addNoUserBoardsItem() {
+        JMenuItem menuItem = createMenuItem("No user boards", 0, null);
+        menuItem.setEnabled(false);
+        userBoardMenu.add(menuItem);
     }
 
     private void addBoardsToUserBoardsMenu(ArrayList<Board> boards) {
@@ -204,14 +208,9 @@ public class SwingApplication extends JFrame implements BoardListDisplay {
     }
 
     private void addBoardToUserBoardMenu(Board board) {
-        JMenuItem item = createUserBoardItem(board);
-        item.addActionListener(e -> new RunGameCommand(gameDisplay, board, this.mediator).execute());
-        userBoardMenu.add(item);
-    }
-
-    private JMenuItem createUserBoardItem(Board board) {
-        String menuItemTitle = board.toString()+" mines";
-        return new JMenuItem(menuItemTitle);
+        JMenuItem menuItem = createMenuItem(board.toString(), KeyEvent.VK_C,
+                e -> new RunGameCommand(gameDisplay, board, this.mediator).execute());
+        userBoardMenu.add(menuItem);
     }
 
     private boolean isDefaultBoards(Board board) {
