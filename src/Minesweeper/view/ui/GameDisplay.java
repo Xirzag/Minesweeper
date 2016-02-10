@@ -1,7 +1,7 @@
 package Minesweeper.view.ui;
 
 import Minesweeper.model.Board;
-import Minesweeper.view.messaging.GameMediator;
+import Minesweeper.model.Cell;
 
 import java.time.Duration;
 
@@ -9,10 +9,14 @@ public interface GameDisplay {
 
     void display();
     public void setRemainingMines(int mines);
-    public void setTimer(Duration time);
+    public void setTimerLabel(Duration time);
 
-    void setRankingBoardsDisplay(RankingBoardsDisplay rankingBoardsDisplay);
+    void initGame(Board board);
 
-    void initGame(Board board, GameMediator mediator);
+    void loseGame();
+
+    void winGame();
+
+    void openCell(Cell cell);
 
 }

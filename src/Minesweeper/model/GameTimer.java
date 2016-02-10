@@ -29,6 +29,7 @@ public class GameTimer {
                 onUpdate();
             }
         }, 1000, 1000);
+
     }
 
     public void stop(){

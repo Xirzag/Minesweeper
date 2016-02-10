@@ -25,4 +25,9 @@ public class Dimension {
     public boolean equals(Object obj) {
         return (obj instanceof Dimension)? this.cols == ((Dimension) obj).cols && this.rows == ((Dimension) obj).rows: false;
     }
+
+    @Override
+    public String toString() {
+        return rows + "x" + cols;
+    }
 }
